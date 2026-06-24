@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Hook runtime state / probe artifacts (created under /tmp at runtime, but ignore
+# any that get copied into the tree)
+cc-recover-*.json
+cc-recover-*.cnt
+cc-recover-heartbeat.*
+
+# Editor / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
