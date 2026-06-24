@@ -31,33 +31,35 @@ COUNTER_DIR = "/tmp"
 # A pool of varied recovery nudges. We inject a RANDOM one each time (avoiding an
 # immediate repeat) so the model is pushed to break out of a repeating failure
 # mode instead of re-reading the same instruction and re-making the same mistake.
-# Angles deliberately differ: prefix-fix, split-smaller, switch-tool, think-first,
-# one-at-a-time, char-by-char check, minimal-call, avoid-complex-quoting, etc.
+# EVERY prompt emphasizes the #1 root cause -- a missing `antml:` namespace
+# prefix -- because that is by far the most common reason these calls fail to
+# parse. The secondary angle still differs per prompt (split-smaller,
+# switch-tool, think-first, one-at-a-time, char-by-char check, batches, etc.).
 RECOVERY_PROMPTS = (
-    "Your last tool call is missing the `antml:` namespace prefix. Re-emit it as `<invoke name=\"...\">` with `<parameter name=\"...\">` children, correctly formatted.",
-    "Your last tool call may have been too long to parse. Split it into several smaller calls, doing one thing at a time, then resend.",
-    "Send exactly ONE tool call this turn (no parallel calls). Make sure it is complete, has the `antml:` prefix, and is properly closed.",
-    "Before resending, check each `<invoke>` and `<parameter>` tag individually: does it carry the `antml:` prefix, and is it properly closed?",
-    "You emitted the tool call as plain text, so it was never executed. Re-issue it using the real tool-call syntax.",
-    "If one tool keeps failing to parse, try an equivalent tool (use Read instead of cat, Grep instead of grep) to accomplish the same thing.",
-    "First state in one plain sentence which tool you'll call next and the key arguments, then emit the correctly-formatted call.",
-    "Pause and slow down. This turn, just emit the single simplest possible tool call and confirm it parses correctly.",
-    "Your tool call is missing the required `antml:` namespace prefix. Re-emit it as `<invoke name=\"...\">` with `<parameter name=\"...\">` children.",
-    "When resending, shorten the arguments (trim the command, read fewer lines) so the call executes first; add detail incrementally afterward.",
-    "Make sure your tool call ends with a proper `</invoke>` and every parameter is correctly closed, then resend.",
-    "Stop emitting explanatory prose — directly emit a single, fully-correct tool call with the `antml:` prefix.",
-    "Discard the failed call entirely and construct a fresh, clean tool call from scratch, verifying character-by-character that the `antml:` prefix is present.",
-    "Break the task into the smallest possible next step and send a tool call for just that step; continue once it succeeds.",
-    "Your invoke/parameter tags are most likely missing the literal `antml:` characters. Add them and send again.",
-    "If the call contains complex shell quoting or a heredoc, rewrite it more simply, or write to a temp file first, to avoid parsing ambiguity.",
-    "No tool actually executed on your last step, so the task is stuck in place. Re-issue the call to continue.",
-    "Send the shortest tool call you're most confident in first to confirm the pipeline works, then continue with the remaining steps.",
-    "The only goal this turn is to produce a syntactically valid tool call — the content can be minimal, but the format must be correct (with the `antml:` prefix).",
-    "Don't write tags like `<invoke>` in ordinary prose; only use them when actually making a call, and include the `antml:` prefix.",
-    "Re-issue the call that just failed, using the correct format, then continue the task — and avoid repeating the same mistake.",
-    "Your call may have run together with the preceding text and failed to parse. Put the tool call in its own block, with the `antml:` prefix, and resend.",
-    "If you're trying to do many things at once, switch to batches: send the first call, wait for its result, then send the next.",
-    "Take a breath and first reason about WHY the last call didn't parse (most likely a missing `antml:` prefix or it was too long), then emit one clean call.",
+    "Your last tool call is almost certainly missing the `antml:` namespace prefix -- by far the most common cause. Re-emit it as `<invoke name=\"...\">` with `<parameter name=\"...\">` children.",
+    "The usual culprit is a missing `antml:` prefix -- your tags must read `<invoke>` and `<parameter>`. If the call was also very long, split it into smaller calls and resend.",
+    "Send exactly ONE tool call this turn, and double-check the single most common failure: every tag must carry the `antml:` prefix (`<invoke>`, `<parameter>`).",
+    "Before resending, check each invoke/parameter tag for the `antml:` prefix -- a missing `antml:` is the most frequent reason these calls fail to parse.",
+    "You emitted the call as plain text, so nothing ran. The most common cause is a dropped `antml:` prefix -- re-issue it using real `<invoke>` syntax.",
+    "First confirm it isn't just a missing `antml:` prefix (the usual cause). If the prefix is correct, try an equivalent tool (Read instead of cat, Grep instead of grep).",
+    "State in one sentence what you'll call next, then emit it -- and make sure every tag has the `antml:` prefix, since a missing `antml:` is the usual cause of these failures.",
+    "Pause and slow down. Emit one simple tool call, and verify the thing that breaks most often: the `antml:` prefix on every `<invoke>` / `<parameter>` tag.",
+    "Your tool call is missing the required `antml:` namespace prefix -- the most common cause of this failure. Re-emit it as `<invoke name=\"...\">` with `<parameter name=\"...\">` children.",
+    "Most likely your tags lost the `antml:` prefix -- add it back. If the call was also long, shorten the arguments so it executes, then build up from there.",
+    "Make sure every tag carries the `antml:` prefix (the most common miss) and the call ends with a proper `</invoke>`, then resend.",
+    "Stop emitting explanatory prose -- directly emit a single correct tool call, making sure each tag carries the `antml:` prefix (the most frequent cause of failures).",
+    "Discard the failed call and rebuild it from scratch, verifying character-by-character that the `antml:` prefix is present -- that's the most common thing that goes missing.",
+    "Break the task into the smallest next step and send one call for it -- and confirm the `antml:` prefix is on every tag, since that's the usual cause of parse failures.",
+    "Your invoke/parameter tags are most likely missing the literal `antml:` characters -- by far the most common cause. Add the prefix and send again.",
+    "First rule out the usual cause -- a missing `antml:` prefix. If the prefix is fine but the call has complex shell quoting or a heredoc, simplify it or write to a temp file first.",
+    "No tool executed, so the task is stuck. The most common reason is a dropped `antml:` prefix -- re-issue the call with `<invoke>` / `<parameter>` tags to continue.",
+    "Send the shortest call you're confident in to confirm the pipeline works -- and make sure its tags carry the `antml:` prefix, the most frequent point of failure.",
+    "The only goal this turn is one syntactically valid tool call -- content can be minimal, but every tag must have the `antml:` prefix (the most common thing that's missing).",
+    "Don't write tags like `<invoke>` in ordinary prose; only use them in a real call, and always include the `antml:` prefix -- a missing `antml:` is the most common cause of these failures.",
+    "Re-issue the failed call in the correct format -- the most common fix is simply adding the missing `antml:` prefix to each tag -- then continue the task.",
+    "Your call may have merged with the preceding text and failed to parse. Put it in its own block with the `antml:` prefix on every tag, and resend.",
+    "If you're doing many things at once, switch to batches: one call at a time. And check the usual cause first -- a missing `antml:` prefix on your tags.",
+    "Take a breath and reason about why the last call didn't parse -- almost always a missing `antml:` prefix. Add it to each tag and emit one clean call.",
 )
 
 # Signal A: harness give-up / retry-failed markers (very specific -> ~0 false positives)
