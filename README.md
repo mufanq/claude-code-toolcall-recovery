@@ -16,6 +16,23 @@ harness can't parse → retries once │   without hook: turn ends, you type "co
                                    ─┘
 ```
 
+### Before / after
+
+```
+WITHOUT the hook                         WITH the hook
+────────────────────                     ────────────────────
+⏺ (malformed tool call)                  ⏺ (malformed tool call)
+✗ tool call could not be parsed          ✗ tool call could not be parsed
+  (retry also failed)                      (retry also failed)
+                                         ↻ Stop hook: "re-issue the call
+  ⏸  session idle…                          correctly (it's missing the
+                                            antml: prefix); continue."
+  you: continue                          ⏺ (correct tool call) → runs
+  you: continue  …again                  ✓ continues the task on its own
+```
+
+> A screen recording is worth more than this sketch — a GIF/asciinema demo is on the to-do list.
+
 ### Key design points
 
 - **Two detection signals** (either one triggers recovery):
@@ -97,6 +114,17 @@ State lives in `/tmp/cc-recover-<session>.json` as `{count, ts, last_idx}`. On e
 2. Decide malformed-or-not via the two signals above (after stripping code).
 3. If not malformed → clear the streak, let the session stop normally.
 4. If malformed → if within the time window and `count >= MAX_RETRIES`, emit a `systemMessage` handing back to you; otherwise pick a random recovery prompt, increment the streak, and emit a `block` decision with that prompt.
+
+## Related issues
+
+This hook is a community workaround for a widely-reported failure mode. If you landed here from one of these, you're in the right place:
+
+- [anthropics/claude-code#49747](https://github.com/anthropics/claude-code/issues/49747) — Opus mixes legacy XML tool-use format into tool calls on longer payloads (the root cause)
+- [anthropics/claude-code#62123](https://github.com/anthropics/claude-code/issues/62123) — "Model's tool call could not be parsed (retry also failed)"
+- [anthropics/claude-code#63875](https://github.com/anthropics/claude-code/issues/63875) — Recurring "tool call could not be parsed" error
+- [anthropics/claude-code#64500](https://github.com/anthropics/claude-code/issues/64500) — Tool call parsing repeatedly fails causing extended session hang
+
+This is an unofficial, third-party tool — not affiliated with or endorsed by Anthropic. It treats the *symptom* (a stalled session) so you don't have to babysit it; it does not fix the underlying parser behavior.
 
 ## License
 
