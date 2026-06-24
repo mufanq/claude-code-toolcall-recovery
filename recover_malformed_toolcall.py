@@ -34,30 +34,30 @@ COUNTER_DIR = "/tmp"
 # Angles deliberately differ: prefix-fix, split-smaller, switch-tool, think-first,
 # one-at-a-time, char-by-char check, minimal-call, avoid-complex-quoting, etc.
 RECOVERY_PROMPTS = (
-    "你上一个工具调用缺少 antml: 命名空间前缀，正确写法是 <invoke name=\"...\"> 配 <parameter name=\"...\">。请用正确格式重发。",
-    "你上一个工具调用可能过长导致解析失败。请把它拆成多个更小的调用，一次只做一件事，然后重发。",
-    "请这一轮只发出一个工具调用（不要并发多个），确保它格式完整、带 antml: 前缀、正确闭合。",
-    "重发前请逐一检查每个 <invoke> 和 <parameter> 标签是否都带 antml: 前缀、是否正确闭合。",
-    "你把工具调用当成普通文本输出了，它并没有被执行。请改用真正的工具调用语法重新发起。",
-    "如果某个工具的调用反复失败，试试换一个等价工具（用 Read 代替 cat、用 Grep 代替 grep）完成同样目的。",
-    "先用一句纯文本说明你下一步要调用什么工具、关键参数是什么，然后再发出格式正确的调用。",
-    "停一下，放慢节奏。这一轮只需要发出一个最简单的工具调用，先确认它能被正确解析。",
+    "Your last tool call is missing the `antml:` namespace prefix. Re-emit it as `<invoke name=\"...\">` with `<parameter name=\"...\">` children, correctly formatted.",
+    "Your last tool call may have been too long to parse. Split it into several smaller calls, doing one thing at a time, then resend.",
+    "Send exactly ONE tool call this turn (no parallel calls). Make sure it is complete, has the `antml:` prefix, and is properly closed.",
+    "Before resending, check each `<invoke>` and `<parameter>` tag individually: does it carry the `antml:` prefix, and is it properly closed?",
+    "You emitted the tool call as plain text, so it was never executed. Re-issue it using the real tool-call syntax.",
+    "If one tool keeps failing to parse, try an equivalent tool (use Read instead of cat, Grep instead of grep) to accomplish the same thing.",
+    "First state in one plain sentence which tool you'll call next and the key arguments, then emit the correctly-formatted call.",
+    "Pause and slow down. This turn, just emit the single simplest possible tool call and confirm it parses correctly.",
     "Your tool call is missing the required `antml:` namespace prefix. Re-emit it as `<invoke name=\"...\">` with `<parameter name=\"...\">` children.",
-    "重发时尽量缩短参数内容（精简命令、少读几行），先让调用成功执行，再逐步补细节。",
-    "确认你的工具调用以 </invoke> 正确结尾、每个 parameter 都正确闭合，然后重发。",
-    "不要再输出解释性文字，直接发出一个格式完全正确、带 antml: 前缀的工具调用。",
-    "把上一个失败的调用整个丢掉，从头重新构造一个干净的工具调用，逐字确认 antml: 前缀没漏。",
-    "把当前任务拆成最小的下一步，只为这一步发一个工具调用，成功后再继续。",
-    "你的 invoke/parameter 标签很可能漏了 antml: 这几个字符。补上它再发一次。",
-    "如果调用里含复杂的 shell 引号或 heredoc，改写成更简单的形式、或先写入临时文件再执行，避免解析歧义。",
-    "你上一步没有任何工具被实际执行，任务停在原地。请重新发出该调用以继续。",
-    "先发一个你最有把握、最短的工具调用，验证链路通畅，再继续后面的步骤。",
-    "这一轮的唯一目标是产出一个语法正确的工具调用——内容可以最简，但格式必须对（带 antml: 前缀）。",
-    "不要在普通文字里书写 <invoke> 这类标签；只在真正发起调用时使用它们，并带上 antml: 前缀。",
-    "用正确格式重新发起刚才失败的调用，然后继续完成任务，注意不要重复同样的错误。",
-    "你的调用可能和前面的文字粘连导致解析失败。让工具调用单独成块、带 antml: 前缀重发。",
-    "如果你想一次做很多事，改成分批：先发第一个调用，等结果回来再发下一个。",
-    "深呼吸，先想清楚上一个调用为什么没被解析（多半是缺 antml: 前缀或过长），修正后发出一个干净的调用。",
+    "When resending, shorten the arguments (trim the command, read fewer lines) so the call executes first; add detail incrementally afterward.",
+    "Make sure your tool call ends with a proper `</invoke>` and every parameter is correctly closed, then resend.",
+    "Stop emitting explanatory prose — directly emit a single, fully-correct tool call with the `antml:` prefix.",
+    "Discard the failed call entirely and construct a fresh, clean tool call from scratch, verifying character-by-character that the `antml:` prefix is present.",
+    "Break the task into the smallest possible next step and send a tool call for just that step; continue once it succeeds.",
+    "Your invoke/parameter tags are most likely missing the literal `antml:` characters. Add them and send again.",
+    "If the call contains complex shell quoting or a heredoc, rewrite it more simply, or write to a temp file first, to avoid parsing ambiguity.",
+    "No tool actually executed on your last step, so the task is stuck in place. Re-issue the call to continue.",
+    "Send the shortest tool call you're most confident in first to confirm the pipeline works, then continue with the remaining steps.",
+    "The only goal this turn is to produce a syntactically valid tool call — the content can be minimal, but the format must be correct (with the `antml:` prefix).",
+    "Don't write tags like `<invoke>` in ordinary prose; only use them when actually making a call, and include the `antml:` prefix.",
+    "Re-issue the call that just failed, using the correct format, then continue the task — and avoid repeating the same mistake.",
+    "Your call may have run together with the preceding text and failed to parse. Put the tool call in its own block, with the `antml:` prefix, and resend.",
+    "If you're trying to do many things at once, switch to batches: send the first call, wait for its result, then send the next.",
+    "Take a breath and first reason about WHY the last call didn't parse (most likely a missing `antml:` prefix or it was too long), then emit one clean call.",
 )
 
 # Signal A: harness give-up / retry-failed markers (very specific -> ~0 false positives)
@@ -264,10 +264,12 @@ def main():
         try:
             print(json.dumps({
                 "systemMessage": (
-                    "畸形 tool call 自动恢复已连续尝试 %d 次仍失败，暂停自动重试、交回人工。"
-                    "可手动输入「继续」，或让我把上一个过长的工具调用拆小后重发。" % MAX_RETRIES
+                    "Auto-recovery from a malformed tool call has failed %d times "
+                    "in a row; pausing automatic retries and handing back to you. "
+                    "Type 'continue' to retry, or ask me to split the previous "
+                    "(possibly too-long) tool call into smaller ones." % MAX_RETRIES
                 )
-            }, ensure_ascii=False))
+            }))
         except Exception:
             pass
         sys.exit(0)
@@ -276,9 +278,10 @@ def main():
     _write_state(session_id, count + 1, now, idx)
     # Wrap the varied nudge with a stable framing so intent is unambiguous.
     reason = (
-        "你上一轮的工具调用没有被正确解析、未执行，任务停在原地。"
+        "Your last tool call was not parsed and did not execute; the task is "
+        "stuck in place. "
         + prompt
-        + "（提示 %d/%d）" % (count + 1, MAX_RETRIES)
+        + " (recovery attempt %d/%d)" % (count + 1, MAX_RETRIES)
     )
     try:
         print(json.dumps({"decision": "block", "reason": reason}, ensure_ascii=False))
